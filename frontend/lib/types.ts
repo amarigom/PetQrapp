@@ -39,6 +39,7 @@ export interface Scan {
   mensaje_encontrador: string | null
   telefono_encontrador: string | null
   created_at: string
+  recent_scans: ScanWithDetails[]
 }
 
 // Respuesta del endpoint GET /pets/{id}
@@ -49,7 +50,10 @@ export interface PetDetailResponse {
 }
 
 export interface ScanWithLocation extends Scan {
-  mascota_nombre?: string
+  // Cambiamos mascota_nombre? por estos dos que pide el mapa:
+  pet_name: string
+  owner_name: string
+  escaneado_en: string // para mapear created_at si es necesario
 }
 
 export interface DashboardStats {
@@ -71,6 +75,8 @@ export interface AdminStats {
   qr_count: number
   scans_count: number
   scans_by_day: { date: string; count: number }[]
+  // Agregamos esto usando la interfaz que acabamos de corregir:
+  recent_scans: ScanWithLocation[] 
 }
 
 export interface LoginCredentials {

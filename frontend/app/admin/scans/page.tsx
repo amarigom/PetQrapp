@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { MapPin, Clock, Globe } from 'lucide-react'
 import { getAdminStats } from '@/lib/api'
 import { formatDateTime } from '@/lib/utils'
-import type { AdminStats } from '@/lib/types'
+import type { AdminStats, ScanWithLocation } from '@/lib/types'
 
 const AdminScanMap = dynamic(() => import('@/components/admin-scan-map'), {
   ssr: false,
@@ -16,6 +16,7 @@ const AdminScanMap = dynamic(() => import('@/components/admin-scan-map'), {
 })
 
 export default function AdminScansPage() {
+  // Usamos un tipado que acepte la estructura normalizada
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -23,7 +24,24 @@ export default function AdminScansPage() {
     async function loadStats() {
       try {
         const data = await getAdminStats()
-        setStats(data)
+        
+        // --- NORMALIZACIÓN DE DATOS ---
+        // Transformamos los scans para que cumplan estrictamente con ScanWithLocation
+        const normalizedScans: ScanWithLocation[] = (data.recent_scans || []).map((s: any) => ({
+          ...s,
+          // Mapeamos los campos que el mapa y la lista necesitan
+          pet_name: s.pet_name || s.mascota_nombre || 'Mascota',
+          owner_name: s.owner_name || s.usuario_nombre || 'Usuario',
+          escaneado_en: s.escaneado_en || s.created_at,
+          direccion: s.direccion || s.direccion_aproximada || 'Sin dirección',
+          latitud: s.latitud ?? null,
+          longitud: s.longitud ?? null
+        }))
+
+        setStats({
+          ...data,
+          recent_scans: normalizedScans
+        })
       } catch (error) {
         console.error('Error loading stats:', error)
       } finally {
@@ -42,9 +60,12 @@ export default function AdminScansPage() {
     )
   }
 
-  const scansWithLocation = stats?.recent_scans.filter(
+  // Ahora recent_scans es seguro de usar porque lo normalizamos arriba
+  const recentScans = stats?.recent_scans || []
+  
+  const scansWithLocation = recentScans.filter(
     (s) => s.latitud && s.longitud
-  ) || []
+  )
 
   return (
     <div className="space-y-6">
@@ -69,18 +90,19 @@ export default function AdminScansPage() {
               </CardDescription>
             </div>
             <Badge variant="secondary">
-              {stats?.total_scans || 0} escaneos totales
+              {stats?.scans_count || 0} escaneos totales
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="h-[500px] rounded-lg overflow-hidden border">
+            {/* Le pasamos los datos normalizados al mapa */}
             <AdminScanMap scans={scansWithLocation} />
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Scans */}
+      {/* Recent Scans List */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -89,13 +111,13 @@ export default function AdminScansPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {stats?.recent_scans.length === 0 ? (
+          {recentScans.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               No hay escaneos registrados
             </p>
           ) : (
             <div className="space-y-3">
-              {stats?.recent_scans.map((scan) => (
+              {recentScans.map((scan) => (
                 <div
                   key={scan.id}
                   className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
@@ -112,10 +134,10 @@ export default function AdminScansPage() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
-                      {scan.direccion ||
+                      {scan.direccion_aproximada ||
                         (scan.latitud && scan.longitud
                           ? `${scan.latitud.toFixed(4)}, ${scan.longitud.toFixed(4)}`
-                          : 'Sin ubicacion')}
+                          : 'Sin ubicación')}
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground whitespace-nowrap">

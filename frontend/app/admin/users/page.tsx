@@ -50,27 +50,33 @@ export default function AdminUsersPage() {
     }
   }
 
-  async function handleDelete(userId: number) {
+  // Cambiamos 'number' a 'string' definitivamente
+async function handleDelete(userId: string) {
     try {
-      await deleteUser(userId)
+      await deleteUser(userId) // La API ahora recibirá el UUID correctamente
       setUsers(users.filter((u) => u.id !== userId))
       toast.success('Usuario eliminado')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al eliminar')
     }
-  }
-
-  async function handleToggleAdmin(userId: number) {
+}
+  // Cambiamos 'number' por 'string'
+async function handleToggleAdmin(userId: string) {
     try {
       const updatedUser = await toggleUserAdmin(userId)
+      
       setUsers(users.map((u) => (u.id === userId ? updatedUser : u)))
+      
+      // Chequeamos si el rol es 'admin' (o el valor que uses en tu DB)
+      const isAdmin = updatedUser.rol === 'admin'
+      
       toast.success(
-        updatedUser.es_admin ? 'Usuario promovido a admin' : 'Admin removido'
+        isAdmin ? 'Usuario promovido a admin' : 'Admin removido'
       )
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al cambiar rol')
     }
-  }
+}
 
   if (isLoading) {
     return (
@@ -115,62 +121,68 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.nombre}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.telefono || '-'}</TableCell>
-                  <TableCell>
-                    {user.es_admin ? (
-                      <Badge className="bg-primary">
-                        <Shield className="w-3 h-3 mr-1" />
-                        Admin
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">Usuario</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>{formatDate(user.creado_en)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleToggleAdmin(user.id)}
-                        title={user.es_admin ? 'Quitar admin' : 'Hacer admin'}
-                      >
-                        {user.es_admin ? (
-                          <ShieldX className="w-4 h-4 text-muted-foreground" />
-                        ) : (
-                          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </Button>
+              {users.map((user) => {
+                // Definimos la constante isAdmin dentro del map para cada usuario
+                const isAdmin = user.rol === 'admin'
 
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta accion eliminara permanentemente a {user.nombre} y todas sus mascotas. Esta accion no se puede deshacer.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(user.id)}>
-                              Eliminar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.nombre}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.telefono || '-'}</TableCell>
+                    <TableCell>
+                      {isAdmin ? (
+                        <Badge className="bg-primary">
+                          <Shield className="w-3 h-3 mr-1" />
+                          Admin
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">Usuario</Badge>
+                      )}
+                    </TableCell>
+                    {/* Usamos created_at que es el campo real de tu interfaz/DB */}
+                    <TableCell>{formatDate(user.created_at)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleToggleAdmin(user.id)}
+                          title={isAdmin ? 'Quitar admin' : 'Hacer admin'}
+                        >
+                          {isAdmin ? (
+                            <ShieldX className="w-4 h-4 text-muted-foreground" />
+                          ) : (
+                            <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </Button>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta accion eliminara permanentemente a {user.nombre} y todas sus mascotas. Esta accion no se puede deshacer.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(user.id)}>
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </CardContent>

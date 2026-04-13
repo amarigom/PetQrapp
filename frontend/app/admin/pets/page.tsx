@@ -13,14 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { PawPrint, Search, Dog, Cat, HelpCircle } from 'lucide-react'
+import { PawPrint, Search, Dog, Cat, HelpCircle,LucideIcon} from 'lucide-react'
 import { getAdminPets } from '@/lib/api'
 import { formatDate } from '@/lib/utils'
 import type { Pet } from '@/lib/types'
 
 type PetWithOwner = Pet & { owner_name: string }
 
-const speciesIcons = {
+const speciesIcons : Record<string, LucideIcon>= {
   perro: Dog,
   gato: Cat,
   otro: HelpCircle,
@@ -143,7 +143,7 @@ export default function AdminPetsPage() {
                     </TableCell>
                     <TableCell>{pet.raza || '-'}</TableCell>
                     <TableCell>{pet.owner_name}</TableCell>
-                    <TableCell>{formatDate(pet.creado_en)}</TableCell>
+                    <TableCell>{formatDate(pet.created_at)}</TableCell>
                   </TableRow>
                 )
               })}
