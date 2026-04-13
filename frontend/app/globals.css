@@ -1,7 +1,9 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
+/*@import 'tw-animate-css';*/
 
-@custom-variant dark (&:is(.dark *));
+
+/*@variant dark (&:where(.dark, .dark *));*/
+
 
 :root {
   /* PetQR Theme - Coral, Turquoise, Yellow */
