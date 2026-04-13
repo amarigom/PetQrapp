@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { MapPin, Clock, PawPrint } from 'lucide-react'
 import { getDashboardStats, getPets } from '@/lib/api'
 import { formatDateTime } from '@/lib/utils'
-import type { DashboardStats, Pet } from '@/lib/types'
+import type { DashboardStats, Pet ,Scan,ScanWithLocation} from '@/lib/types'
 
 // Dynamic import for Leaflet (client-side only)
 const ScanMap = dynamic(() => import('@/components/scan-map'), {
@@ -50,9 +50,15 @@ export default function MapPage() {
     )
   }
 
-  const scansWithLocation = stats?.recent_scans.filter(
-    (scan) => scan.latitud && scan.longitud
-  ) || []
+  const scansWithLocation: ScanWithLocation[] = (stats?.recent_scans || [])
+  .filter((s) => s.latitud !== null && s.longitud !== null)
+  .map((s) => ({
+    ...s, // Copia todo lo de Scan (incluyendo los opcionales si existen)
+    pet_name: s.mascota_nombre,
+    escaneado_en: s.created_at,
+    latitud: s.latitud as number,
+    longitud: s.longitud as number,
+  }));
 
   return (
     <div className="space-y-6">
@@ -77,18 +83,25 @@ export default function MapPage() {
               </CardDescription>
             </div>
             <Badge variant="secondary">
-              {stats?.total_scans || 0} escaneos totales
+              {stats?.scans_count || 0} escaneos totales
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           {scansWithLocation.length === 0 ? (
-            <Empty
-              icon={MapPin}
-              title="Sin ubicaciones"
-              description="Aun no hay escaneos con ubicacion registrada"
-              className="py-12"
-            />
+            <Empty className="py-12 border-2">
+  <div className="flex flex-col items-center gap-2">
+    {/* El icono lo renderizamos adentro */}
+    <MapPin className="w-12 h-12 text-muted-foreground" />
+    
+    <div className="space-y-1">
+      <h3 className="font-medium text-lg">Sin ubicaciones</h3>
+      <p className="text-sm text-muted-foreground">
+        Aun no hay escaneos con ubicacion registrada
+      </p>
+    </div>
+  </div>
+</Empty>
           ) : (
             <div className="h-[400px] rounded-lg overflow-hidden border">
               <ScanMap scans={scansWithLocation} pets={pets} />
@@ -117,11 +130,11 @@ export default function MapPage() {
                     <PawPrint className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium">{scan.pet_name || 'Mascota'}</p>
+                    <p className="font-medium">{scan.mascota_nombre || 'Mascota'}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-3 h-3" />
                       <span className="truncate">
-                        {scan.direccion || (scan.latitud && scan.longitud
+                        {scan.direccion_aproximada || (scan.latitud && scan.longitud
                           ? `${scan.latitud.toFixed(4)}, ${scan.longitud.toFixed(4)}`
                           : 'Ubicacion desconocida')}
                       </span>

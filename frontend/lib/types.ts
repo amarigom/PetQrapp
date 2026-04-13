@@ -31,15 +31,15 @@ export interface QRCode {
 }
 
 export interface Scan {
-  id: string
-  qr_id: string
-  latitud: number | null
-  longitud: number | null
-  direccion_aproximada: string | null
-  mensaje_encontrador: string | null
-  telefono_encontrador: string | null
-  created_at: string
-  recent_scans: ScanWithDetails[]
+  id: string;
+  mascota_nombre: string;
+  latitud: number | null;
+  longitud: number | null;
+  created_at: string;
+  // AGREGÁ EL SIGNO '?' AQUÍ:
+  mensaje_encontrador?: string; 
+  telefono_encontrador?: string;
+  direccion_aproximada: string;
 }
 
 // Respuesta del endpoint GET /pets/{id}
@@ -50,10 +50,8 @@ export interface PetDetailResponse {
 }
 
 export interface ScanWithLocation extends Scan {
-  // Cambiamos mascota_nombre? por estos dos que pide el mapa:
-  pet_name: string
-  owner_name: string
-  escaneado_en: string // para mapear created_at si es necesario
+  pet_name: string;      // Campos extra que requiere el componente mapa
+  escaneado_en: string;
 }
 
 export interface DashboardStats {
@@ -66,6 +64,8 @@ export interface DashboardStats {
     latitud: number | null
     longitud: number | null
     created_at: string
+    direccion_aproximada: string;
+    escaneado_en: string;
   }[]
 }
 
@@ -75,8 +75,6 @@ export interface AdminStats {
   qr_count: number
   scans_count: number
   scans_by_day: { date: string; count: number }[]
-  // Agregamos esto usando la interfaz que acabamos de corregir:
-  recent_scans: ScanWithLocation[] 
 }
 
 export interface LoginCredentials {

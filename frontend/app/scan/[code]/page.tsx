@@ -117,7 +117,7 @@ export default function ScanPage() {
   }
 
   const whatsappMessage = encodeURIComponent(
-    `Hola! Encontre a ${pet.nombre}. Escanee el codigo QR de su collar.`
+    `Hola! Encontre a ${pet.pet.nombre}. Escanee el codigo QR de su collar.`
   )
   const whatsappUrl = pet.owner?.telefono
     ? `https://wa.me/${pet.owner.telefono.replace(/\D/g, '')}?text=${whatsappMessage}`
@@ -155,10 +155,10 @@ export default function ScanPage() {
         <Card className="overflow-hidden">
           {/* Pet Photo */}
           <div className="aspect-video bg-muted relative">
-            {pet.foto_url ? (
+            {pet.pet.foto_url ? (
               <img
-                src={pet.foto_url}
-                alt={pet.nombre}
+                src={pet.pet.foto_url}
+                alt={pet.pet.nombre}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -168,15 +168,15 @@ export default function ScanPage() {
             )}
             <Badge className="absolute top-3 right-3 bg-primary">
               <PawPrint className="w-3 h-3 mr-1" />
-              {pet.especie}
+              {pet.pet.especie}
             </Badge>
           </div>
 
           <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">{pet.nombre}</CardTitle>
-            {pet.raza && (
+            <CardTitle className="text-2xl">{pet.pet.nombre}</CardTitle>
+            {pet.pet.raza && (
               <CardDescription className="capitalize">
-                {pet.raza}
+                {pet.pet.raza}
               </CardDescription>
             )}
           </CardHeader>
@@ -184,28 +184,28 @@ export default function ScanPage() {
           <CardContent className="space-y-4">
             {/* Pet Details */}
             <div className="grid grid-cols-2 gap-3">
-              {pet.color && (
+              {pet.pet.color && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                   <Palette className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Color</p>
-                    <p className="text-sm font-medium">{pet.color}</p>
+                    <p className="text-sm font-medium">{pet.pet.color}</p>
                   </div>
                 </div>
               )}
 
-              {pet.fecha_nacimiento && (
+              {pet.pet.edad_aproximada && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Nacimiento</p>
-                    <p className="text-sm font-medium">{formatDate(pet.fecha_nacimiento)}</p>
+                    <p className="text-sm font-medium">{formatDate(pet.pet.edad_aproximada)}</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {pet.notas_medicas && (
+            {pet.pet.notas && (
               <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
                 <div className="flex items-center gap-2 mb-1">
                   <FileText className="w-4 h-4 text-amber-600" />
@@ -214,7 +214,7 @@ export default function ScanPage() {
                   </p>
                 </div>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
-                  {pet.notas_medicas}
+                  {pet.pet.notas}
                 </p>
               </div>
             )}
@@ -226,7 +226,7 @@ export default function ScanPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Contactar al Dueno</CardTitle>
             <CardDescription>
-              {pet.owner?.nombre || 'Dueno de ' + pet.nombre}
+              {pet.owner?.nombre || 'Dueno de ' + pet.pet.nombre}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

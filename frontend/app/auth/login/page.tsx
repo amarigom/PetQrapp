@@ -27,7 +27,7 @@ export default function LoginPage() {
       const response = await login({ email, password })
       toast.success(`Bienvenido, ${response.user.nombre}!`)
       
-      if (response.user.es_admin) {
+      if (response.user.rol === 'admin') {
         router.push('/admin')
       } else {
         router.push('/dashboard')
