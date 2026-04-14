@@ -4,6 +4,11 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
+// En lugar de: import 'leaflet/dist/leaflet.css'
+// Usá esto:
+if (typeof window !== 'undefined') {
+  require('leaflet/dist/leaflet.css');
+}
 
 const nunito = Nunito({ subsets: ['latin'] })
 const _geistMono = Geist_Mono({ subsets: ['latin'] })

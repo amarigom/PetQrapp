@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+/*import 'leaflet/dist/leaflet.css'*/
 import { formatDateTime } from '@/lib/utils'
 import type { ScanWithLocation, Pet } from '@/lib/types'
 
@@ -74,8 +74,8 @@ export default function ScanMap({ scans, pets }: ScanMapProps) {
               <p className="text-sm text-gray-600">
                 {formatDateTime(scan.escaneado_en)}
               </p>
-              {scan.direccion && (
-                <p className="text-xs text-gray-500 mt-1">{scan.direccion}</p>
+              {scan.direccion_aproximada && (
+                <p className="text-xs text-gray-500 mt-1">{scan.direccion_aproximada}</p>
               )}
             </div>
           </Popup>
