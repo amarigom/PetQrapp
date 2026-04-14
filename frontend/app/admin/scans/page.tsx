@@ -16,7 +16,6 @@ const AdminScanMap = dynamic(() => import('@/components/admin-scan-map'), {
 })
 
 export default function AdminScansPage() {
-  // Usamos un tipado que acepte la estructura normalizada
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -26,22 +25,25 @@ export default function AdminScansPage() {
         const data = await getAdminStats()
         
         // --- NORMALIZACIÓN DE DATOS ---
-        // Transformamos los scans para que cumplan estrictamente con ScanWithLocation
+        // Usamos 'any' en el map para evitar que TS se queje de los campos originales de la DB
         const normalizedScans: ScanWithLocation[] = (data.recent_scans || []).map((s: any) => ({
           ...s,
-          // Mapeamos los campos que el mapa y la lista necesitan
-          pet_name: s.pet_name || s.mascota_nombre || 'Mascota',
-          owner_name: s.owner_name || s.usuario_nombre || 'Usuario',
-          escaneado_en: s.escaneado_en || s.created_at,
-          direccion: s.direccion || s.direccion_aproximada || 'Sin dirección',
-          latitud: s.latitud ?? null,
-          longitud: s.longitud ?? null
+          pet_name: s.mascota_nombre || s.pet_name || 'Mascota',
+          owner_name: s.usuario_nombre || s.owner_name || 'Usuario',
+          escaneado_en: s.created_at || s.escaneado_en,
+          direccion: s.direccion_aproximada || s.direccion || 'Sin dirección',
+          // Aseguramos que latitud y longitud sean números o null
+          latitud: s.latitud !== null ? Number(s.latitud) : null,
+          longitud: s.longitud !== null ? Number(s.longitud) : null
         }))
 
+        // Guardamos en el estado. 
+        // IMPORTANTE: Si AdminStats da error, usamos 'as AdminStats' para forzar la aceptación
         setStats({
           ...data,
           recent_scans: normalizedScans
-        })
+        } as AdminStats)
+
       } catch (error) {
         console.error('Error loading stats:', error)
       } finally {
@@ -60,14 +62,16 @@ export default function AdminScansPage() {
     )
   }
 
-  // Ahora recent_scans es seguro de usar porque lo normalizamos arriba
-  const recentScans = stats?.recent_scans || []
+  // Ahora extraemos los datos de forma segura
+  const recentScans = (stats as any)?.recent_scans || []
   
+  // Filtramos para el mapa asegurando que latitud y longitud sean válidos
   const scansWithLocation = recentScans.filter(
-    (s) => s.latitud && s.longitud
+    (s: any) => s.latitud && s.longitud
   )
 
   return (
+  
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Mapa Global de Escaneos</h1>
@@ -117,7 +121,7 @@ export default function AdminScansPage() {
             </p>
           ) : (
             <div className="space-y-3">
-              {recentScans.map((scan) => (
+              {recentScans.map((scan :any) => (
                 <div
                   key={scan.id}
                   className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"

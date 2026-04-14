@@ -75,6 +75,7 @@ export interface AdminStats {
   qr_count: number
   scans_count: number
   scans_by_day: { date: string; count: number }[]
+  recent_scans: ScanWithLocation[]
 }
 
 export interface LoginCredentials {
