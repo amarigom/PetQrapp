@@ -22,13 +22,17 @@ import {
 } from 'lucide-react'
 import { scanQR } from '@/lib/api'
 import { formatDate } from '@/lib/utils'
-import type { PetWithQR } from '@/lib/types'
+import type { Pet, QRCode } from '@/lib/types'
 
 export default function ScanPage() {
   const params = useParams()
   const code = params.code as string
 
-  const [pet, setPet] = useState<PetWithQR | null>(null)
+  const [data, setData] = useState<{ 
+  pet: Pet; 
+  owner: { nombre: string; telefono: string; } 
+} | null>(null);
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [locationSent, setLocationSent] = useState(false)
@@ -60,7 +64,7 @@ export default function ScanPage() {
         }
 
         const petData = await scanQR(code, location)
-        setPet(petData)
+        setData(petData)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Codigo QR no valido')
       } finally {
@@ -89,7 +93,7 @@ export default function ScanPage() {
     )
   }
 
-  if (error || !pet) {
+  if (error || !data) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-accent/5 p-4 flex items-center justify-center">
         <Card className="max-w-md w-full">
@@ -117,10 +121,10 @@ export default function ScanPage() {
   }
 
   const whatsappMessage = encodeURIComponent(
-    `Hola! Encontre a ${pet.pet.nombre}. Escanee el codigo QR de su collar.`
+    `Hola! Encontre a ${data.pet.nombre}. Escanee el codigo QR de su collar.`
   )
-  const whatsappUrl = pet.owner?.telefono
-    ? `https://wa.me/${pet.owner.telefono.replace(/\D/g, '')}?text=${whatsappMessage}`
+  const whatsappUrl = data.owner?.telefono
+    ? `https://wa.me/${data.owner.telefono.replace(/\D/g, '')}?text=${whatsappMessage}`
     : null
 
   return (
@@ -155,10 +159,10 @@ export default function ScanPage() {
         <Card className="overflow-hidden">
           {/* Pet Photo */}
           <div className="aspect-video bg-muted relative">
-            {pet.pet.foto_url ? (
+            {data.pet.foto_url ? (
               <img
-                src={pet.pet.foto_url}
-                alt={pet.pet.nombre}
+                src={data.pet.foto_url}
+                alt={data.pet.nombre}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -168,15 +172,15 @@ export default function ScanPage() {
             )}
             <Badge className="absolute top-3 right-3 bg-primary">
               <PawPrint className="w-3 h-3 mr-1" />
-              {pet.pet.especie}
+              {data.pet.especie}
             </Badge>
           </div>
 
           <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">{pet.pet.nombre}</CardTitle>
-            {pet.pet.raza && (
+            <CardTitle className="text-2xl">{data.pet.nombre}</CardTitle>
+            {data.pet.raza && (
               <CardDescription className="capitalize">
-                {pet.pet.raza}
+                {data.pet.raza}
               </CardDescription>
             )}
           </CardHeader>
@@ -184,28 +188,28 @@ export default function ScanPage() {
           <CardContent className="space-y-4">
             {/* Pet Details */}
             <div className="grid grid-cols-2 gap-3">
-              {pet.pet.color && (
+              {data.pet.color && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                   <Palette className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Color</p>
-                    <p className="text-sm font-medium">{pet.pet.color}</p>
+                    <p className="text-sm font-medium">{data.pet.color}</p>
                   </div>
                 </div>
               )}
 
-              {pet.pet.edad_aproximada && (
+              {data.pet.edad_aproximada && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Nacimiento</p>
-                    <p className="text-sm font-medium">{formatDate(pet.pet.edad_aproximada)}</p>
+                    <p className="text-sm font-medium">{formatDate(data.pet.edad_aproximada)}</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {pet.pet.notas && (
+            {data.pet.notas && (
               <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
                 <div className="flex items-center gap-2 mb-1">
                   <FileText className="w-4 h-4 text-amber-600" />
@@ -214,7 +218,7 @@ export default function ScanPage() {
                   </p>
                 </div>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
-                  {pet.pet.notas}
+                  {data.pet.notas}
                 </p>
               </div>
             )}
@@ -226,16 +230,16 @@ export default function ScanPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Contactar al Dueno</CardTitle>
             <CardDescription>
-              {pet.owner?.nombre || 'Dueno de ' + pet.pet.nombre}
+              {data.owner?.nombre || 'Dueno de ' + data.pet.nombre}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {pet.owner?.telefono ? (
+            {data.owner?.telefono ? (
               <>
-                <a href={`tel:${pet.owner.telefono}`} className="block">
+                <a href={`tel:${data.owner.telefono}`} className="block">
                   <Button className="w-full" size="lg">
                     <Phone className="w-5 h-5 mr-2" />
-                    Llamar: {pet.owner.telefono}
+                    Llamar: {data.owner.telefono}
                   </Button>
                 </a>
                 {whatsappUrl && (
