@@ -45,6 +45,7 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.1.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "react-hook-form": "^7.0.0"
   }
 }
