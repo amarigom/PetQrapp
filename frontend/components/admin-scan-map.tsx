@@ -3,9 +3,9 @@
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+/*import 'leaflet/dist/leaflet.css'*/L
 import { formatDateTime } from '@/lib/utils'
-import type { Scan } from '@/lib/types'
+import type { Scan, ScanWithLocation } from '@/lib/types'
 
 // Fix Leaflet default marker icon
 const DefaultIcon = L.icon({
@@ -21,10 +21,10 @@ L.Marker.prototype.options.icon = DefaultIcon
 type ScanWithDetails = Scan & { pet_name: string; owner_name: string }
 
 interface AdminScanMapProps {
-  scans: ScanWithDetails[]
+  scans: ScanWithLocation[]
 }
 
-function FitBounds({ scans }: { scans: ScanWithDetails[] }) {
+function FitBounds({ scans }: { scans: ScanWithLocation[] }) {
   const map = useMap()
 
   useEffect(() => {
@@ -72,12 +72,12 @@ export default function AdminScanMap({ scans }: AdminScanMapProps) {
           <Popup>
             <div className="p-2 min-w-[180px]">
               <p className="font-semibold">{scan.pet_name}</p>
-              <p className="text-sm text-gray-600">Dueno: {scan.owner_name}</p>
+              <p className="text-sm text-gray-600">Dueno: {scan.pet_name}</p>
               <p className="text-xs text-gray-500 mt-1">
                 {formatDateTime(scan.escaneado_en)}
               </p>
-              {scan.direccion && (
-                <p className="text-xs text-gray-500 mt-1">{scan.direccion}</p>
+              {scan.direccion_aproximada && (
+                <p className="text-xs text-gray-500 mt-1">{scan.direccion_aproximada}</p>
               )}
             </div>
           </Popup>
