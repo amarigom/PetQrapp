@@ -17,12 +17,17 @@ export function QRCodeDisplay({ code, petName, size = 200 }: QRCodeDisplayProps)
   return (
     <div className="flex flex-col items-center">
       <div className="p-4 bg-white rounded-xl shadow-sm border">
-        {/* Eliminamos imageSettings y src: '' que suelen causar conflictos con href */}
         <QRCodeSVG
           value={scanUrl}
           size={size}
           level="H"
           includeMargin={false}
+          imageSettings={{
+            src: '',
+            height: 24,
+            width: 24,
+            excavate: true,
+          }}
         />
       </div>
       <div className="mt-4 text-center">

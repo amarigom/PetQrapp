@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -41,7 +41,6 @@ export default function PetDetailPage() {
   const params = useParams()
   const router = useRouter()
   const petId = params.id as string
-  const qrRef = useRef<HTMLDivElement>(null);
 
   const [pet, setPet] = useState<Pet | null>(null)
   const [qr, setQr] = useState<QRCodeType | null>(null)
@@ -49,43 +48,6 @@ export default function PetDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  
-  const handleDownloadQR = () => {
-    // Buscamos el SVG dentro del contenedor usando el ref
-    const svg = qrRef.current?.querySelector('svg');
-    
-    if (!svg) {
-      toast.error("No se pudo encontrar el código QR para descargar");
-      return;
-    }
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-
-    img.onload = () => {
-      // Definimos el tamaño del canvas igual al tamaño del QR (200x200 por defecto)
-      canvas.width = 200; 
-      canvas.height = 200;
-      
-      if (ctx) {
-        // Dibujamos un fondo blanco (importante para que se lea bien el QR)
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        
-        const pngFile = canvas.toDataURL("image/png");
-        const downloadLink = document.createElement("a");
-        downloadLink.download = `QR-${pet?.nombre || 'mascota'}-${qr?.codigo}.png`;
-        downloadLink.href = pngFile;
-        downloadLink.click();
-      }
-    };
-
-    // Usamos btoa de forma segura para caracteres especiales
-    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
-  };
 
   useEffect(() => {
     async function loadPet() {
@@ -205,6 +167,7 @@ export default function PetDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Photo */}
             <div className="aspect-video rounded-lg overflow-hidden bg-muted">
               {pet.foto_url ? (
                 <img
@@ -219,6 +182,7 @@ export default function PetDetailPage() {
               )}
             </div>
 
+            {/* Details */}
             <div className="grid grid-cols-2 gap-4">
               {pet.color && (
                 <div className="flex items-center gap-3">
@@ -275,11 +239,7 @@ export default function PetDetailPage() {
             <CardContent className="space-y-4">
               {qr && qr.activo ? (
                 <>
-                  {/* AQUÍ EL REF ENVOLVIENDO EL COMPONENTE */}
-                  <div ref={qrRef} className="flex justify-center bg-white p-2 rounded-lg">
-                    <QRCodeDisplay code={qr.codigo} petName={pet.nombre} />
-                  </div>
-
+                  <QRCodeDisplay code={qr.codigo} petName={pet.nombre} />
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -290,13 +250,7 @@ export default function PetDetailPage() {
                       <Copy className="w-4 h-4 mr-2" />
                       Copiar Link
                     </Button>
-                    {/* BOTÓN CON LA FUNCIÓN ASIGNADA */}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={handleDownloadQR}
-                    >
+                    <Button variant="outline" size="sm" className="flex-1">
                       <Download className="w-4 h-4 mr-2" />
                       Descargar
                     </Button>
